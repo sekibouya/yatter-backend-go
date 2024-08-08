@@ -9,8 +9,8 @@ import (
 
 // Request body for `POST /v1/statuses`
 type AddRequest struct {
-	Status string
-	Medias []map[string]interface{}
+	Content string
+	Medias  []map[string]interface{}
 }
 
 // Handle request for `POST /v1/statuses`
@@ -25,7 +25,7 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	dto, err := h.statusUsecase.AddStatus(ctx, req.Status)
+	dto, err := h.statusUsecase.AddStatus(ctx, int(account_info.ID), req.Content)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
