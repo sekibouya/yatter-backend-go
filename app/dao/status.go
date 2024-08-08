@@ -29,7 +29,7 @@ func (s *status) AddStatus(ctx context.Context, tx *sqlx.Tx, status *object.Stat
 	_, err := s.db.ExecContext(ctx, "insert into status (account_id, url, content, created_at) values (?, ?, ?, ?)",
 		status.AccountID, status.URL, status.Content, status.CreatedAt)
 	if err != nil {
-		return fmt.Errorf("change! failed to insert account: %w", err)
+		return fmt.Errorf("failed to insert account: %w", err)
 	}
 
 	return nil

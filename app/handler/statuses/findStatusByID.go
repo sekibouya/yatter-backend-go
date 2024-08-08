@@ -12,7 +12,7 @@ func (h *handler) FindStatusByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	acc_id, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
