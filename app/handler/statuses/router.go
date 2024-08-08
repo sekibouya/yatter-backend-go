@@ -29,6 +29,9 @@ func NewRouter(ar repository.Account, u usecase.Status) http.Handler {
 		}
 		r.Post("/", h.Create)
 	})
-
+	h := &handler{
+		ar, u,
+	}
+	r.Get("/{id}", h.FindStatusByID)
 	return r
 }
