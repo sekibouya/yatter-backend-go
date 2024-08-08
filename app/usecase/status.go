@@ -9,7 +9,7 @@ import (
 )
 
 type Status interface {
-	AddStatus(ctx context.Context, content string) (*AddStatusDTO, error)
+	AddStatus(ctx context.Context, acc_id int, content string) (*AddStatusDTO, error)
 }
 
 type status struct {
@@ -30,8 +30,8 @@ func NewStatus(db *sqlx.DB, statusRepo repository.Status) *status {
 	}
 }
 
-func (s *status) AddStatus(ctx context.Context, content string) (*AddStatusDTO, error) {
-	sta := object.NewStatus(content)
+func (s *status) AddStatus(ctx context.Context, acc_id int, content string) (*AddStatusDTO, error) {
+	sta := object.NewStatus(acc_id, content)
 
 	tx, err := s.db.Beginx()
 	if err != nil {
