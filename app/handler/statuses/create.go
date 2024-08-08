@@ -9,8 +9,8 @@ import (
 
 // Request body for `POST /v1/statuses`
 type AddRequest struct {
-	Content string
-	Medias  []map[string]interface{}
+	Content string                   `json:"status"`
+	Medias  []map[string]interface{} `json:"omitempty"`
 }
 
 // Handle request for `POST /v1/statuses`
