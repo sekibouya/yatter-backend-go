@@ -2,7 +2,6 @@ package statuses
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"yatter-backend-go/app/domain/auth"
 )
@@ -32,7 +31,6 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Authentication", fmt.Sprintf("username %v", account_info.Username))
 	if err := json.NewEncoder(w).Encode(dto.Status); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
