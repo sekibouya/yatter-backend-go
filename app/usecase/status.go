@@ -23,7 +23,7 @@ type AddStatusDTO struct {
 }
 
 type GetStatusDTO struct {
-	Status *object.Status
+	Statuses []*object.Status
 }
 
 var _ Status = (*status)(nil)
@@ -73,12 +73,12 @@ func (s *status) FindStatusByID(ctx context.Context, acc_id int) (*GetStatusDTO,
 
 		tx.Commit()
 	}()
-	sta, err := s.statusRepo.FindStatusByID(ctx, tx, acc_id)
+	statuses, err := s.statusRepo.FindStatusByID(ctx, tx, acc_id)
 	if err != nil {
 		return nil, err
 	}
 
 	return &GetStatusDTO{
-		Status: sta,
+		Statuses: statuses,
 	}, nil
 }
