@@ -7,6 +7,7 @@ import (
 )
 
 const defaultLimit = 40
+const maxLimit = 80
 
 func (h *handler) findPublicTimelines(w http.ResponseWriter, r *http.Request) {
 	only_media, err := strconv.ParseBool(r.FormValue("only_media"))
@@ -25,6 +26,10 @@ func (h *handler) findPublicTimelines(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
+
+	if maxLimit < limit {
+		limit = maxLimit
+	}
 
 	dto, err := h.timelineUsecase.FindPublicTimelines(ctx, only_media, since_id, limit)
 	if err != nil {
