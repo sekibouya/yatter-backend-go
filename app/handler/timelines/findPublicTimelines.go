@@ -9,10 +9,10 @@ import (
 )
 
 type timelineStruct struct {
-	ID        int
-	Account   object.Account
-	Content   string
-	CreatedAt time.Time
+	ID        int            `json:"id"`
+	Account   object.Account `json:"account"`
+	Content   string         `json:"content"`
+	CreatedAt time.Time      `json:"create_at"`
 }
 
 const defaultLimit = 40

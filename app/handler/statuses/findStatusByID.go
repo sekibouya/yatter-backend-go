@@ -11,10 +11,10 @@ import (
 )
 
 type statusStruct struct {
-	ID        int
-	Account   object.Account
-	Content   string
-	CreatedAt time.Time
+	ID        int            `json:"id"`
+	Account   object.Account `json:"account"`
+	Content   string         `json:"content"`
+	CreatedAt time.Time      `json:"create_at"`
 }
 
 func (h *handler) FindStatusByID(w http.ResponseWriter, r *http.Request) {
