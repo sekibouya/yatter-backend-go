@@ -23,7 +23,7 @@ type AddStatusDTO struct {
 }
 
 type GetStatusDTO struct {
-	Statuses []*object.Status
+	Statuses []object.Timeline
 }
 
 var _ Status = (*status)(nil)

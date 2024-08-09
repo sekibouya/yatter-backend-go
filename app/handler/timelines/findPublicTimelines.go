@@ -8,7 +8,7 @@ import (
 	"yatter-backend-go/app/domain/object"
 )
 
-type Timeline struct {
+type timelineStruct struct {
 	ID        int
 	Account   object.Account
 	Content   string
@@ -46,8 +46,8 @@ func (h *handler) findPublicTimelines(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var timeline Timeline
-	var timelines []Timeline
+	var timeline timelineStruct
+	var timelines []timelineStruct
 	for _, e := range dto.Timelines {
 		timeline.ID = e.Status.ID
 		timeline.Account = *e.Account

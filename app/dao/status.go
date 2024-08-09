@@ -35,8 +35,8 @@ func (s *status) AddStatus(ctx context.Context, tx *sqlx.Tx, status *object.Stat
 	return nil
 }
 
-func (s *status) FindStatusByID(ctx context.Context, tx *sqlx.Tx, acc_id int) ([]*object.Status, error) {
-	rows, err := s.db.QueryContext(ctx, "select * from status where account_id = ?", acc_id)
+func (s *status) FindStatusByID(ctx context.Context, tx *sqlx.Tx, acc_id int) ([]object.Timeline, error) {
+	rows, err := s.db.QueryContext(ctx, "select * from account,status where account.id = status.account_id and status.account_id = ?", acc_id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
@@ -46,12 +46,20 @@ func (s *status) FindStatusByID(ctx context.Context, tx *sqlx.Tx, acc_id int) ([
 	}
 	defer rows.Close()
 
-	entities := make([]*object.Status, 0)
+	entities := make([]object.Timeline, 0)
 
 	for rows.Next() {
-		var entity object.Status
-		rows.Scan(&entity.ID, &entity.AccountID, &entity.URL, &entity.Content, &entity.CreatedAt)
-		entities = append(entities, &entity)
+		var sta object.Status
+		var acc object.Account
+		err := rows.Scan(&acc.ID, &acc.Username, &acc.PasswordHash, &acc.DisplayName, &acc.Avatar, &acc.Header, &acc.Note, &acc.CreateAt,
+			&sta.ID, &sta.AccountID, &sta.URL, &sta.Content, &sta.CreatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		var entity object.Timeline
+		entity.Account = &acc
+		entity.Status = &sta
+		entities = append(entities, entity)
 	}
 
 	return entities, nil
