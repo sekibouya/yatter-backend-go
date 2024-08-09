@@ -25,14 +25,17 @@ func NewStatus(db *sqlx.DB) *status {
 	return &status{db: db}
 }
 
-func (s *status) AddStatus(ctx context.Context, tx *sqlx.Tx, status *object.Status) error {
+func (s *status) AddStatus(ctx context.Context, tx *sqlx.Tx, status *object.Status) (*int, *object.Account, error) {
 	_, err := s.db.ExecContext(ctx, "insert into status (account_id, url, content, created_at) values (?, ?, ?, ?)",
 		status.AccountID, status.URL, status.Content, status.CreatedAt)
 	if err != nil {
-		return fmt.Errorf("failed to insert account: %w", err)
+		return nil, nil, fmt.Errorf("failed to insert status: %w", err)
 	}
-
-	return nil
+	var id int
+	s.db.QueryRowContext(ctx, "select id from status order by id desc limit 1;").Scan(&id)
+	var acc object.Account
+	s.db.QueryRowContext(ctx, "select * from account where id = ?", status.AccountID).Scan(&acc.ID, &acc.Username, &acc.PasswordHash, &acc.DisplayName, &acc.Avatar, &acc.Header, &acc.Note, &acc.CreateAt)
+	return &id, &acc, nil
 }
 
 func (s *status) FindStatusByID(ctx context.Context, tx *sqlx.Tx, acc_id int) ([]object.Timeline, error) {

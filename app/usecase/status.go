@@ -19,7 +19,8 @@ type status struct {
 }
 
 type AddStatusDTO struct {
-	Status *object.Status
+	Account *object.Account
+	Status  *object.Status
 }
 
 type GetStatusDTO struct {
@@ -51,12 +52,14 @@ func (s *status) AddStatus(ctx context.Context, acc_id int, content string) (*Ad
 		tx.Commit()
 	}()
 
-	if err := s.statusRepo.AddStatus(ctx, tx, sta); err != nil {
+	id, acc, err := s.statusRepo.AddStatus(ctx, tx, sta)
+	if err != nil {
 		return nil, err
 	}
-
+	sta.ID = *id
 	return &AddStatusDTO{
-		Status: sta,
+		Account: acc,
+		Status:  sta,
 	}, nil
 }
 
