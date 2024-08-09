@@ -8,8 +8,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-const maxLimit = 80
-
 type Timeline interface {
 	FindPublicTimelines(ctx context.Context, only_media bool, since_id, limit int) (*GetTimelineDTO, error)
 }
@@ -46,9 +44,6 @@ func (t *timeline) FindPublicTimelines(ctx context.Context, only_media bool, sin
 		tx.Commit()
 	}()
 
-	if maxLimit < limit {
-		limit = maxLimit
-	}
 	timelines, err := t.timelineRepo.FindPublicTimelines(ctx, tx, only_media, since_id, limit)
 	if err != nil {
 		return nil, err
