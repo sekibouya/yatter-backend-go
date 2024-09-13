@@ -8,5 +8,5 @@ import (
 )
 
 type Timeline interface {
-	FindPublicTimelines(ctx context.Context, tx *sqlx.Tx, only_media bool, since_id, limit int) ([]object.Timeline, error)
+	FindPublicTimelines(ctx context.Context, tx *sqlx.Tx, only_media bool, since_id, limit int) (*object.Timeline, error)
 }

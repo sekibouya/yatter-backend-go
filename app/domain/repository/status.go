@@ -8,6 +8,6 @@ import (
 )
 
 type Status interface {
-	AddStatus(ctx context.Context, tx *sqlx.Tx, status *object.Status) (*int, *object.Account, error)
-	FindStatusByID(ctx context.Context, tx *sqlx.Tx, acc_id int) ([]object.Timeline, error)
+	AddStatus(ctx context.Context, tx *sqlx.Tx, status *object.Status) (*int, error)
+	FindStatusByID(ctx context.Context, tx *sqlx.Tx, statusId int) (*object.Status, error)
 }

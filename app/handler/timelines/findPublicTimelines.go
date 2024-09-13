@@ -4,16 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"time"
-	"yatter-backend-go/app/domain/object"
 )
-
-type timelineStruct struct {
-	ID        int            `json:"id"`
-	Account   object.Account `json:"account"`
-	Content   string         `json:"content"`
-	CreatedAt time.Time      `json:"create_at"`
-}
 
 const defaultLimit = 40
 const maxLimit = 80
@@ -34,11 +25,11 @@ func (h *handler) findPublicTimelines(w http.ResponseWriter, r *http.Request) {
 		limit = defaultLimit
 	}
 
-	ctx := r.Context()
-
 	if maxLimit < limit {
 		limit = maxLimit
 	}
+
+	ctx := r.Context()
 
 	dto, err := h.timelineUsecase.FindPublicTimelines(ctx, only_media, since_id, limit)
 	if err != nil {
@@ -46,18 +37,8 @@ func (h *handler) findPublicTimelines(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var timeline timelineStruct
-	var timelines []timelineStruct
-	for _, e := range dto.Timelines {
-		timeline.ID = e.Status.ID
-		timeline.Account = *e.Account
-		timeline.Content = e.Status.Content
-		timeline.CreatedAt = e.Status.CreatedAt
-		timelines = append(timelines, timeline)
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(timelines); err != nil {
+	if err := json.NewEncoder(w).Encode(dto.Timeline.Status); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

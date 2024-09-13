@@ -15,9 +15,7 @@ type handler struct {
 // Create Handler for `/v1/timelines/public`
 func NewRouter(u usecase.Timeline) http.Handler {
 	r := chi.NewRouter()
-	h := &handler{
-		u,
-	}
+	h := &handler{u}
 	r.Get("/public", h.findPublicTimelines)
 	return r
 }

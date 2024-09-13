@@ -7,12 +7,12 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (h *handler) Fetch(w http.ResponseWriter, r *http.Request) {
+func (h *handler) FindAccountByUsername(w http.ResponseWriter, r *http.Request) {
 	username := chi.URLParam(r, "username")
 
 	ctx := r.Context()
 
-	dto, err := h.accountUsecase.Fetch(ctx, username)
+	dto, err := h.accountUsecase.FindAccountByUsername(ctx, username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -25,45 +25,28 @@ func NewStatus(db *sqlx.DB) *status {
 	return &status{db: db}
 }
 
-func (s *status) AddStatus(ctx context.Context, tx *sqlx.Tx, status *object.Status) (*int, *object.Account, error) {
-	_, err := s.db.ExecContext(ctx, "insert into status (account_id, url, content, created_at) values (?, ?, ?, ?)",
-		status.AccountID, status.URL, status.Content, status.CreatedAt)
+func (s *status) AddStatus(ctx context.Context, tx *sqlx.Tx, status *object.Status) (*int, error) {
+	_, err := tx.ExecContext(ctx, "insert into status (account_id, url, content, created_at) values (?, ?, ?, ?)",
+		status.Account.ID, status.URL, status.Content, status.CreatedAt)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to insert status: %w", err)
+		return nil, fmt.Errorf("failed to insert status: %w", err)
 	}
-	var id int
-	s.db.QueryRowContext(ctx, "select id from status order by id desc limit 1;").Scan(&id)
-	var acc object.Account
-	s.db.QueryRowContext(ctx, "select * from account where id = ?", status.AccountID).Scan(&acc.ID, &acc.Username, &acc.PasswordHash, &acc.DisplayName, &acc.Avatar, &acc.Header, &acc.Note, &acc.CreateAt)
-	return &id, &acc, nil
+	var statusId int
+	tx.QueryRowContext(ctx, "select id from status order by id desc limit 1;").Scan(&statusId)
+	return &statusId, nil
 }
 
-func (s *status) FindStatusByID(ctx context.Context, tx *sqlx.Tx, acc_id int) ([]object.Timeline, error) {
-	rows, err := s.db.QueryContext(ctx, "select * from account,status where account.id = status.account_id and status.account_id = ?", acc_id)
+func (s *status) FindStatusByID(ctx context.Context, tx *sqlx.Tx, statusId int) (*object.Status, error) {
+	row := s.db.QueryRowxContext(ctx, "select * from account,status where account.id = status.account_id and status.id = ?", statusId)
+	status := new(object.Status)
+	err := row.Scan(&status.Account.ID, &status.Account.Username, &status.Account.PasswordHash, &status.Account.DisplayName, &status.Account.Avatar,
+		&status.Account.Header, &status.Account.Note, &status.Account.CreateAt, &status.ID, &status.Account.ID, &status.URL, &status.Content, &status.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("failed to find account from db: %w", err)
+		return nil, fmt.Errorf("failed to find status from db: %w", err)
 	}
-	defer rows.Close()
-
-	entities := make([]object.Timeline, 0)
-
-	for rows.Next() {
-		var sta object.Status
-		var acc object.Account
-		err := rows.Scan(&acc.ID, &acc.Username, &acc.PasswordHash, &acc.DisplayName, &acc.Avatar, &acc.Header, &acc.Note, &acc.CreateAt,
-			&sta.ID, &sta.AccountID, &sta.URL, &sta.Content, &sta.CreatedAt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
-		}
-		var entity object.Timeline
-		entity.Account = &acc
-		entity.Status = &sta
-		entities = append(entities, entity)
-	}
-
-	return entities, nil
+	return status, nil
 }

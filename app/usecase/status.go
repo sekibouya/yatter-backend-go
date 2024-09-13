@@ -9,8 +9,8 @@ import (
 )
 
 type Status interface {
-	AddStatus(ctx context.Context, acc_id int, content string) (*AddStatusDTO, error)
-	FindStatusByID(ctx context.Context, acc_id int) (*GetStatusDTO, error)
+	AddStatus(ctx context.Context, account object.Account, content string) (*AddStatusDTO, error)
+	FindStatusByID(ctx context.Context, statusId int) (*GetStatusDTO, error)
 }
 
 type status struct {
@@ -19,12 +19,11 @@ type status struct {
 }
 
 type AddStatusDTO struct {
-	Account *object.Account
-	Status  *object.Status
+	Status *object.Status
 }
 
 type GetStatusDTO struct {
-	Statuses []object.Timeline
+	Status *object.Status
 }
 
 var _ Status = (*status)(nil)
@@ -36,8 +35,8 @@ func NewStatus(db *sqlx.DB, statusRepo repository.Status) *status {
 	}
 }
 
-func (s *status) AddStatus(ctx context.Context, acc_id int, content string) (*AddStatusDTO, error) {
-	sta := object.NewStatus(acc_id, content)
+func (s *status) AddStatus(ctx context.Context, account object.Account, content string) (*AddStatusDTO, error) {
+	sta := object.NewStatus(account, content)
 
 	tx, err := s.db.Beginx()
 	if err != nil {
@@ -52,18 +51,15 @@ func (s *status) AddStatus(ctx context.Context, acc_id int, content string) (*Ad
 		tx.Commit()
 	}()
 
-	id, acc, err := s.statusRepo.AddStatus(ctx, tx, sta)
+	statusId, err := s.statusRepo.AddStatus(ctx, tx, sta)
 	if err != nil {
 		return nil, err
 	}
-	sta.ID = *id
-	return &AddStatusDTO{
-		Account: acc,
-		Status:  sta,
-	}, nil
+	sta.ID = *statusId
+	return &AddStatusDTO{Status: sta}, nil
 }
 
-func (s *status) FindStatusByID(ctx context.Context, acc_id int) (*GetStatusDTO, error) {
+func (s *status) FindStatusByID(ctx context.Context, statusId int) (*GetStatusDTO, error) {
 	tx, err := s.db.Beginx()
 	if err != nil {
 		return nil, err
@@ -76,12 +72,10 @@ func (s *status) FindStatusByID(ctx context.Context, acc_id int) (*GetStatusDTO,
 
 		tx.Commit()
 	}()
-	statuses, err := s.statusRepo.FindStatusByID(ctx, tx, acc_id)
+	status, err := s.statusRepo.FindStatusByID(ctx, tx, statusId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &GetStatusDTO{
-		Statuses: statuses,
-	}, nil
+	return &GetStatusDTO{Status: status}, nil
 }

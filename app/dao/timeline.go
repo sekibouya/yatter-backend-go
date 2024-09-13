@@ -25,7 +25,7 @@ func NewTimeline(db *sqlx.DB) *timeline {
 	return &timeline{db: db}
 }
 
-func (t *timeline) FindPublicTimelines(ctx context.Context, tx *sqlx.Tx, only_media bool, since_id, limit int) ([]object.Timeline, error) {
+func (t *timeline) FindPublicTimelines(ctx context.Context, tx *sqlx.Tx, only_media bool, since_id, limit int) (*object.Timeline, error) {
 	query := `
 		SELECT account.id, account.username, account.password_hash, account.display_name, account.avatar, account.header, account.note, account.create_at,
 			status.id, status.account_id, status.url, status.content, status.created_at 
@@ -40,25 +40,21 @@ func (t *timeline) FindPublicTimelines(ctx context.Context, tx *sqlx.Tx, only_me
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("failed to find account from db: %w", err)
+		return nil, fmt.Errorf("failed to find statuses from db: %w", err)
 	}
 	defer rows.Close()
 
-	entities := make([]object.Timeline, 0)
+	var timeline object.Timeline
 
 	for rows.Next() {
 		var sta object.Status
-		var acc object.Account
-		err := rows.Scan(&acc.ID, &acc.Username, &acc.PasswordHash, &acc.DisplayName, &acc.Avatar, &acc.Header, &acc.Note, &acc.CreateAt,
-			&sta.ID, &sta.AccountID, &sta.URL, &sta.Content, &sta.CreatedAt)
+		err := rows.Scan(&sta.Account.ID, &sta.Account.Username, &sta.Account.PasswordHash, &sta.Account.DisplayName, &sta.Account.Avatar,
+			&sta.Account.Header, &sta.Account.Note, &sta.Account.CreateAt, &sta.ID, &sta.Account.ID, &sta.URL, &sta.Content, &sta.CreatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
-		var entity object.Timeline
-		entity.Account = &acc
-		entity.Status = &sta
-		entities = append(entities, entity)
+		timeline.Status = append(timeline.Status, &sta)
 	}
 
-	return entities, nil
+	return &timeline, nil
 }

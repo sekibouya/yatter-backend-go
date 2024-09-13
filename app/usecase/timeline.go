@@ -18,7 +18,7 @@ type timeline struct {
 }
 
 type GetTimelineDTO struct {
-	Timelines []object.Timeline
+	Timeline *object.Timeline
 }
 
 var _ Timeline = (*timeline)(nil)
@@ -44,12 +44,10 @@ func (t *timeline) FindPublicTimelines(ctx context.Context, only_media bool, sin
 		tx.Commit()
 	}()
 
-	timelines, err := t.timelineRepo.FindPublicTimelines(ctx, tx, only_media, since_id, limit)
+	timeline, err := t.timelineRepo.FindPublicTimelines(ctx, tx, only_media, since_id, limit)
 	if err != nil {
 		return nil, err
 	}
 
-	return &GetTimelineDTO{
-		Timelines: timelines,
-	}, nil
+	return &GetTimelineDTO{Timeline: timeline}, nil
 }

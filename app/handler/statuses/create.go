@@ -24,22 +24,14 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	dto, err := h.statusUsecase.AddStatus(ctx, int(account_info.ID), req.Content)
+	dto, err := h.statusUsecase.AddStatus(ctx, *account_info, req.Content)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var status statusStruct
-	var statuses []statusStruct
-	status.ID = dto.Status.ID
-	status.Account = *dto.Account
-	status.Content = dto.Status.Content
-	status.CreatedAt = dto.Status.CreatedAt
-	statuses = append(statuses, status)
-
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(statuses); err != nil {
+	if err := json.NewEncoder(w).Encode(dto.Status); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

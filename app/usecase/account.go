@@ -10,7 +10,7 @@ import (
 
 type Account interface {
 	Create(ctx context.Context, username, password string) (*CreateAccountDTO, error)
-	Fetch(ctx context.Context, username string) (*GetAccountDTO, error)
+	FindAccountByUsername(ctx context.Context, username string) (*GetAccountDTO, error)
 }
 
 type account struct {
@@ -65,7 +65,7 @@ func (a *account) Create(ctx context.Context, username, password string) (*Creat
 	}, nil
 }
 
-func (a *account) Fetch(ctx context.Context, username string) (*GetAccountDTO, error) {
+func (a *account) FindAccountByUsername(ctx context.Context, username string) (*GetAccountDTO, error) {
 	tx, err := a.db.Beginx()
 	if err != nil {
 		return nil, err
