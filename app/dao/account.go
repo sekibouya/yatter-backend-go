@@ -40,12 +40,17 @@ func (a *account) FindByUsername(ctx context.Context, username string) (*object.
 	return entity, nil
 }
 
-func (a *account) Create(ctx context.Context, tx *sqlx.Tx, acc *object.Account) error {
-	_, err := a.db.Exec("insert into account (username, password_hash, display_name, avatar, header, note, create_at) values (?, ?, ?, ?, ?, ?, ?)",
+func (a *account) Create(ctx context.Context, tx *sqlx.Tx, acc *object.Account) (*int, error) {
+	_, err := tx.Exec("insert into account (username, password_hash, display_name, avatar, header, note, create_at) values (?, ?, ?, ?, ?, ?, ?)",
 		acc.Username, acc.PasswordHash, acc.DisplayName, acc.Avatar, acc.Header, acc.Note, acc.CreateAt)
 	if err != nil {
-		return fmt.Errorf("failed to insert account: %w", err)
+		return nil, fmt.Errorf("failed to insert account: %w", err)
 	}
 
-	return nil
+	var id int
+	err = tx.QueryRowContext(ctx, "select id from account order by id desc limit 1;").Scan(&id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve last insert id: %w", err)
+	}
+	return &id, nil
 }
